@@ -4,15 +4,54 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Project Todo</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>Project Todo</h1>
-  <p id="health">서버 상태 확인 중…</p>
-  <script>
-    fetch("/api/health")
-      .then((r) => r.json())
-      .then((d) => { document.getElementById("health").textContent = `서버 정상 (저장소: ${d.db_backend})`; })
-      .catch(() => { document.getElementById("health").textContent = "서버에 연결할 수 없습니다."; });
-  </script>
+  <header class="topbar">
+    <h1 class="app-title">Project Todo</h1>
+    <div class="current">
+      <span class="current-label">현재 프로젝트</span>
+      <strong id="current-name">미분류</strong>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" aria-label="프로젝트 목록">
+      <h2 class="side-heading">프로젝트</h2>
+      <ul id="project-list" class="project-list"></ul>
+
+      <form id="project-form" class="project-form" autocomplete="off">
+        <input id="project-name" type="text" maxlength="100" placeholder="새 프로젝트 이름" aria-label="새 프로젝트 이름">
+        <button type="submit">추가</button>
+      </form>
+    </aside>
+
+    <main class="main">
+      <form id="todo-form" class="todo-form" autocomplete="off">
+        <input id="todo-title" type="text" maxlength="200" placeholder="할 일을 입력하세요" aria-label="할 일 제목" required>
+        <input id="todo-due" type="date" aria-label="마감일 (선택)">
+        <select id="todo-project" aria-label="소속 프로젝트"></select>
+        <button type="submit">등록</button>
+      </form>
+
+      <div class="list-toolbar">
+        <span id="list-summary" class="list-summary"></span>
+        <label class="sort">
+          정렬
+          <select id="sort-select">
+            <option value="created">등록순</option>
+            <option value="due">마감일순</option>
+          </select>
+        </label>
+      </div>
+
+      <ul id="todo-list" class="todo-list"></ul>
+      <p id="empty" class="empty" hidden>할 일이 없습니다. 위에서 새 할 일을 등록하세요.</p>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="alert" hidden></div>
+
+  <script type="module" src="app.js"></script>
 </body>
 </html>

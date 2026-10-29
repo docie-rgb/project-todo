@@ -4,7 +4,7 @@ SQLite·PostgreSQL 저장소가 모두 이 규칙을 공유하므로, 저장소�
 """
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date
 
 
@@ -12,11 +12,15 @@ from datetime import date
 class CurrentUser:
     """요청한 사용자. 로컬 모드는 로그인이 없으므로 id=None(단일 사용자).
 
-    Step 3에서는 Supabase 로그인 토큰을 검증해 auth.uid() 를 id 에 담는다.
+    Supabase 모드에서는 백엔드가 검증한 로그인 정보를 담는다.
+    access_token 은 DB 요청에 그대로 실어 보내 RLS 가 이 사용자로 적용되게 한다.
+    (repr=False: 로그나 오류 메시지에 토큰이 찍히지 않게 한다)
     클라이언트가 보낸 user_id 는 절대 사용하지 않는다.
     """
 
     id: str | None
+    email: str | None = None
+    access_token: str | None = field(default=None, repr=False)
 
 
 LOCAL_USER = CurrentUser(id=None)
@@ -42,6 +46,21 @@ class DuplicateProjectName(DomainError):
 class InvalidProject(DomainError):
     def __init__(self):
         super().__init__("존재하지 않는 프로젝트입니다.")
+
+
+class Unauthorized(DomainError):
+    def __init__(self, message: str = "로그인이 필요합니다."):
+        super().__init__(message)
+
+
+class PermissionDenied(DomainError):
+    def __init__(self, message: str = "권한이 없습니다."):
+        super().__init__(message)
+
+
+class StorageUnavailable(DomainError):
+    def __init__(self, message: str = "데이터 저장소에 연결할 수 없습니다. 잠시 후 다시 시도하세요."):
+        super().__init__(message)
 
 
 _DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")

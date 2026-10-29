@@ -19,3 +19,7 @@ def _resolve(path: str) -> Path:
 
 
 DB_PATH = _resolve(os.getenv("DB_PATH", "todo.db"))
+
+# Supabase 모드 전용. publishable 키는 공개용 키이며, RLS를 우회하는 secret/service_role 키는 사용하지 않는다.
+SUPABASE_URL = os.getenv("SUPABASE_URL", "").rstrip("/")
+SUPABASE_PUBLISHABLE_KEY = os.getenv("SUPABASE_PUBLISHABLE_KEY", "")

@@ -9,11 +9,15 @@ from backend.repositories.base import Repository
 
 @lru_cache
 def get_repo() -> Repository:
-    """DB_BACKEND 설정에 따라 저장소 구현을 고른다. Step 3에서 supabase 분기를 추가한다."""
+    """DB_BACKEND 설정에 따라 저장소 구현을 고른다. 선택되지 않은 쪽은 만들지 않는다."""
     if config.DB_BACKEND == "sqlite":
         from backend.repositories.sqlite_repo import SqliteRepository
 
         return SqliteRepository(config.DB_PATH)
+    if config.DB_BACKEND == "supabase":
+        from backend.repositories.supabase_repo import SupabaseRepository
+
+        return SupabaseRepository(config.SUPABASE_URL, config.SUPABASE_PUBLISHABLE_KEY)
     raise RuntimeError(f"지원하지 않는 DB_BACKEND: {config.DB_BACKEND}")
 
 

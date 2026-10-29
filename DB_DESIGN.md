@@ -270,6 +270,21 @@ create policy todos_delete on public.todos
 - `UPDATE ... WITH CHECK` 로 행의 `user_id` 를 다른 사용자로 바꾸는 것(소유권 넘기기)을 막는다.
 - 앱에는 anon(publishable) 키만 `.env` 로 넣는다. RLS를 우회하는 `service_role` 키는 클라이언트·Git에 넣지 않는다.
 
+### 5-3-1. 테이블 권한 (Step 3 구현 시 추가)
+
+테이블 구조 변경은 아니며, 실행용 SQL은 `supabase/schema.sql` 에 있다.
+
+```sql
+revoke all on table public.projects, public.todos from anon, authenticated;
+grant select, insert, update, delete on table public.projects, public.todos to authenticated;
+```
+
+- Supabase는 새 테이블에 `anon`·`authenticated` 권한(TRUNCATE 등 포함)을 자동 부여한다. 모두 회수한 뒤 로그인 사용자에게 4가지 작업만 다시 준다.
+- 비로그인(`anon`) 요청은 RLS 이전에 테이블 권한 단계에서 거부된다 (이중 방어).
+- `TRUNCATE` 는 RLS 정책의 적용을 받지 않으므로 권한 자체를 주지 않는다.
+
+**SQLite와의 동작 차이 (구조 변경 없음):** PostgreSQL `lower()` 는 `Ä/ä` 같은 비ASCII 라틴 문자도 소문자로 바꾸지만 SQLite `lower()` 는 ASCII만 바꾼다. 요구사항은 "영문 대소문자"이고 한글에는 대소문자가 없으므로 영향이 없다.
+
 ### 5-4. 인증
 
 - Supabase Auth 이메일/비밀번호 로그인(무료)으로 충분하다.

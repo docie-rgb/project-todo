@@ -24,6 +24,9 @@ _STATUS = {
     domain.NotFound: 404,
     domain.DuplicateProjectName: 409,
     domain.InvalidProject: 422,
+    domain.Unauthorized: 401,
+    domain.PermissionDenied: 403,
+    domain.StorageUnavailable: 503,
 }
 
 

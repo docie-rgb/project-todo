@@ -23,3 +23,10 @@ DB_PATH = _resolve(os.getenv("DB_PATH", "todo.db"))
 # Supabase 모드 전용. publishable 키는 공개용 키이며, RLS를 우회하는 secret/service_role 키는 사용하지 않는다.
 SUPABASE_URL = os.getenv("SUPABASE_URL", "").rstrip("/")
 SUPABASE_PUBLISHABLE_KEY = os.getenv("SUPABASE_PUBLISHABLE_KEY", "")
+
+# 세션 쿠키에 Secure 속성(HTTPS에서만 전송)을 붙일지. 로컬 http 는 false, Render(https) 는 true.
+COOKIE_SECURE = os.getenv("COOKIE_SECURE", "false").strip().lower() in ("1", "true", "yes")
+
+# 데이터를 바꾸는 요청을 허용할 추가 출처(Origin). 기본적으로 앱 자신의 주소만 허용한다.
+# 예: ALLOWED_ORIGINS=https://project-todo.onrender.com
+ALLOWED_ORIGINS = {o.strip().rstrip("/") for o in os.getenv("ALLOWED_ORIGINS", "").split(",") if o.strip()}

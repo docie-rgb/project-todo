@@ -31,6 +31,9 @@
 
 * { box-sizing: border-box; }
 
+/* display 를 지정한 요소(.layout 등)도 hidden 속성으로 확실히 숨긴다 */
+[hidden] { display: none !important; }
+
 body {
   margin: 0;
   background: var(--bg);
@@ -76,6 +79,26 @@ button.link.danger:hover { color: var(--danger); }
 }
 .app-title { margin: 0; font-size: 20px; }
 .current-label { color: var(--muted); font-size: 13px; margin-right: 6px; }
+.user-box { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.user-email { color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+
+/* ---------- 로그인 ---------- */
+.login-view { display: flex; justify-content: center; padding: 48px 16px; }
+.login-form {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+.login-form h2 { margin: 0 0 4px; font-size: 18px; }
+.login-form label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
+.login-form input { color: var(--text); }
+.login-message { margin: 0; min-height: 1.4em; font-size: 13px; color: var(--danger); }
 
 /* ---------- 레이아웃 ---------- */
 .layout {
@@ -191,6 +214,7 @@ button.link.danger:hover { color: var(--danger); }
 /* ---------- 좁은 화면 ---------- */
 @media (max-width: 720px) {
   .topbar { flex-direction: column; gap: 4px; padding: 12px 16px; }
+  .user-box { margin-left: 0; }
   .layout { grid-template-columns: 1fr; padding: 0 16px; margin: 16px auto; }
   .project-actions { opacity: 1; }
 }

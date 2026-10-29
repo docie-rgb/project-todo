@@ -42,6 +42,9 @@
 - [ ] B2 실습: `tests/test_supabase_repo.py` 의 `test_zero_rows_on_update_or_delete_is_not_found` 를 읽고, 남의 할 일을 수정하면 왜 오류가 아니라 0건이 오는지 설명하기
 - [ ] B2 실습: `pytest tests/test_supabase_repo.py -v` 실행 결과 예상(통과 개수) → 실행 → 비교
 - [ ] B2 학습 점검 질문 답하기
+- [ ] B3 실습: 로그인 후 브라우저 개발자도구(F12) → Application → Cookies 에서 `pt_access`/`pt_refresh` 의 HttpOnly·SameSite·Path 확인 (값은 기록하지 않기), Console 에서 `document.cookie` 결과 예상 → 실행 → 비교
+- [ ] B3 실습: 로그아웃 후 `/api/projects` 응답 코드 예상 → 확인
+- [ ] B3 학습 점검 질문 답하기
 
 ---
 

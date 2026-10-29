@@ -9,13 +9,35 @@
 <body>
   <header class="topbar">
     <h1 class="app-title">Project Todo</h1>
-    <div class="current">
+    <div id="current" class="current" hidden>
       <span class="current-label">현재 프로젝트</span>
       <strong id="current-name">미분류</strong>
     </div>
+    <!-- supabase 모드에서 로그인한 경우에만 표시 -->
+    <div id="user-box" class="user-box" hidden>
+      <span id="user-email" class="user-email"></span>
+      <button id="logout-button" type="button">로그아웃</button>
+    </div>
   </header>
 
-  <div class="layout">
+  <!-- supabase 모드에서 로그인하지 않은 경우 표시. 회원가입은 없음(계정은 Supabase 대시보드에서 생성) -->
+  <section id="login-view" class="login-view" hidden>
+    <form id="login-form" class="login-form">
+      <h2>로그인</h2>
+      <label>
+        이메일
+        <input id="login-email" type="email" autocomplete="username" required>
+      </label>
+      <label>
+        비밀번호
+        <input id="login-password" type="password" autocomplete="current-password" required>
+      </label>
+      <button id="login-button" type="submit">로그인</button>
+      <p id="login-message" class="login-message" role="status"></p>
+    </form>
+  </section>
+
+  <div id="app-view" class="layout" hidden>
     <aside class="sidebar" aria-label="프로젝트 목록">
       <h2 class="side-heading">프로젝트</h2>
       <ul id="project-list" class="project-list"></ul>

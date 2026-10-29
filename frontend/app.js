@@ -1,5 +1,5 @@
 // 화면 상태와 렌더링. 데이터는 api.js 를 통해서만 주고받는다.
-import { api, UNASSIGNED } from "./api.js";
+import { api, AUTH_REQUIRED_EVENT, UNASSIGNED } from "./api.js";
 
 const state = {
   projects: [],
@@ -352,6 +352,78 @@ $("sort-select").addEventListener("change", async (e) => {
   }
 });
 
-loadPrefs();
-$("sort-select").value = state.sort;
-refresh().catch(showError);
+// ---------- 로그인 (supabase 모드에서만) ----------
+function resetState() {
+  Object.assign(state, {
+    projects: [],
+    unassigned: { total_count: 0, done_count: 0 },
+    selected: UNASSIGNED,
+    todos: [],
+    editingTodo: null,
+    editingProject: null,
+  });
+}
+
+function showLogin(message = "") {
+  resetState(); // 이전 사용자의 데이터가 화면에 남지 않게 비운다
+  $("app-view").hidden = true;
+  $("current").hidden = true;
+  $("user-box").hidden = true;
+  $("login-view").hidden = false;
+  $("login-message").textContent = message;
+  $("login-password").value = "";
+  $("login-email").focus();
+}
+
+async function showApp(user) {
+  $("login-view").hidden = true;
+  $("app-view").hidden = false;
+  $("current").hidden = false;
+  $("user-box").hidden = !user; // sqlite 모드는 사용자 표시 없음
+  $("user-email").textContent = user?.email ?? "";
+  loadPrefs();
+  $("sort-select").value = state.sort;
+  await refresh();
+}
+
+$("login-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const button = $("login-button");
+  button.disabled = true;
+  $("login-message").textContent = "";
+  try {
+    // 비밀번호는 백엔드로만 전송되고, 백엔드가 Supabase 에 확인한 뒤 HttpOnly 쿠키를 심는다.
+    const { user } = await api.login($("login-email").value.trim(), $("login-password").value);
+    $("login-password").value = "";
+    await showApp(user);
+  } catch (err) {
+    $("login-message").textContent = err.message;
+  } finally {
+    button.disabled = false;
+  }
+});
+
+$("logout-button").addEventListener("click", async () => {
+  try {
+    await api.logout();
+  } catch (err) {
+    showError(err);
+  }
+  try { localStorage.removeItem(PREFS_KEY); } catch { /* 무시 */ }
+  showLogin("로그아웃되었습니다.");
+});
+
+// 갱신까지 실패한 경우 (api.js 가 알림)
+window.addEventListener(AUTH_REQUIRED_EVENT, () => showLogin("로그인이 만료되었습니다. 다시 로그인하세요."));
+
+// ---------- 시작 ----------
+async function boot() {
+  const { auth_required: authRequired, user } = await api.me();
+  if (authRequired && !user) {
+    showLogin();
+  } else {
+    await showApp(user);
+  }
+}
+
+boot().catch(showError);

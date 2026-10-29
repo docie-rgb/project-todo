@@ -1,0 +1,20 @@
+# 비밀정보 / 로컬 설정
+.env
+
+# 로컬 SQLite 데이터 (journal/WAL 파일 포함)
+todo.db
+todo.db-*
+*.db
+*.sqlite3
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# OS / 에디터
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

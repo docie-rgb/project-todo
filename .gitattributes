@@ -1,0 +1,3 @@
+# 저장소에는 LF 줄바꿈으로 저장한다 (Windows의 autocrlf 설정과 무관하게 일관성 유지)
+* text=auto eol=lf
+*.db binary

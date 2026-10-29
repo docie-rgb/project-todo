@@ -1,10 +1,16 @@
 # Project Todo
 
-여러 프로젝트의 할 일을 나눠 관리하는 웹 Todo 앱. 현재는 **길 A: 로컬 SQLite** 버전이다.
+여러 프로젝트의 할 일을 나눠 관리하는 웹 Todo 앱. 저장소를 두 가지 중에서 고를 수 있다.
+
+| 모드 | `.env` 의 `DB_BACKEND` | 데이터 위치 | 로그인 |
+|---|---|---|---|
+| 길 A | `sqlite` (기본값) | 로컬 `todo.db` | 없음 |
+| 길 B | `supabase` | Supabase PostgreSQL (RLS 로 사용자별 격리) | 필요 (Supabase Auth) |
 
 - 요구사항: [PRD.md](PRD.md)
 - DB 설계: [DB_DESIGN.md](DB_DESIGN.md)
 - 검증 기록: [TEST_LOG.md](TEST_LOG.md)
+- 배포 준비: [DEPLOY.md](DEPLOY.md)
 
 ## 기능
 
@@ -68,6 +74,27 @@ API 문서(Swagger UI): http://localhost:8000/docs
 .venv/Scripts/python -m pytest
 ```
 
+## Supabase 모드 (길 B)
+
+1. Supabase 프로젝트 생성 → SQL Editor 에서 [`supabase/schema.sql`](supabase/schema.sql) 실행 (테이블·권한·RLS)
+2. Authentication → Users → **Add user → Create new user** (Auto Confirm 체크) 로 사용자 생성 — 앱에는 회원가입이 없다
+3. `.env` 작성 (`.env.example` 참고, Git 에 올라가지 않음)
+   - `DB_BACKEND=supabase`, `COOKIE_SECURE=false`
+   - `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` (Project Settings → Data API / API Keys) — **secret 키는 넣지 않는다**
+4. 서버 실행 후 http://localhost:8000 에서 로그인
+
+검증 스크립트 (`.env` 에 테스트 계정 `RLS_TEST_A_*`, `RLS_TEST_B_*` 필요):
+
+```bash
+.venv/Scripts/python -m scripts.rls_check
+```
+
+```bash
+.venv/Scripts/python -m scripts.cloud_persistence before
+```
+
+동작 방식: 백엔드가 로그인 사용자의 토큰을 Supabase REST 요청에 실어 보내고, DB 의 RLS 정책이 그 사용자 행만 허용한다. 토큰은 HttpOnly 쿠키에만 저장되어 화면 JavaScript 에서 읽을 수 없다.
+
 ## API
 
 | 메서드 | 경로 | 설명 |
@@ -80,6 +107,8 @@ API 문서(Swagger UI): http://localhost:8000/docs
 | POST | `/api/todos` | `{"title", "project_id"?, "due_date"?}` 생성 |
 | PATCH | `/api/todos/{id}` | 보낸 필드만 수정 (`project_id`/`due_date` 에 `null` = 미분류/마감일 제거) |
 | DELETE | `/api/todos/{id}` | 삭제 |
+| GET | `/api/auth/me` | 로그인 필요 여부·현재 사용자 (supabase 모드) |
+| POST | `/api/auth/login` · `/api/auth/logout` · `/api/auth/refresh` | 로그인·로그아웃·토큰 갱신 (supabase 모드) |
 
 ## todo.db 직접 확인하기
 
@@ -105,4 +134,5 @@ ORDER BY p.name, t.due_date;
 ## 보안·Git
 
 - `.env`, `todo.db`, `.venv/` 는 `.gitignore` 로 제외된다.
-- 클라이언트가 보낸 `user_id` 는 받지 않는다(422). Step 3에서는 서버가 Supabase 로그인 토큰으로 사용자를 확인한다.
+- 클라이언트가 보낸 `user_id` 는 받지 않는다(422). supabase 모드에서는 서버가 Supabase 로그인 토큰을 검증하고, 행의 주인은 DB 기본값 `auth.uid()` 가 정한다.
+- 데이터를 바꾸는 요청은 같은 출처(Origin)·JSON 형식만 허용한다 (CSRF 방어).

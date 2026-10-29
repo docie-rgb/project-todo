@@ -101,6 +101,8 @@ foreign_key_check: [] | integrity_check: ok
 | `06-project-deleted-todos-unassigned.jpg` | 프로젝트 삭제 후 할 일이 미분류로 이동 |
 | `07-edit-mode.jpg` | 할 일 수정 모드 |
 
+`02-after-refresh.jpg` 와 `03-after-server-restart.jpg` 는 화면이 같아 파일 내용도 동일하다. 화면만으로는 재시작 여부를 구분할 수 없으므로, 재시작 사실과 데이터 유지는 1-3 의 절차(프로세스 종료·포트 확인·재시작 전후 API 응답 완전 일치)로 입증한다.
+
 ## 2. 길 B — Supabase
 
 | 항목 | 값 |
@@ -201,6 +203,23 @@ foreign_key_check: [] | integrity_check: ok
 | 서버가 계속 sqlite 모드로 시작 | `.env` 파일이 없었음 | `.env.example` 기반으로 `.env` 생성(비밀값은 사용자가 입력) |
 | 테스트 계정 A·B 로그인 실패 `invalid_credentials` | 계정이 비밀번호 없이 생성된 것으로 추정 (Supabase 는 계정 없음·비밀번호 오류를 같은 코드로 응답) | 대시보드 **Create new user + Auto Confirm** 으로 재생성 후 로그인 성공 |
 | `.env` 생성 후 테스트 7개 실패 | 테스트가 로컬 `.env` 의 `DB_BACKEND=supabase` 를 읽음 | `tests/conftest.py` 에서 테스트는 항상 sqlite 모드로 시작하도록 격리 |
+
+### 2-8. Supabase 모드 작동 화면 (브라우저)
+
+2026-10-29 21:44~21:48. 사용자가 앱 안 브라우저에서 직접 로그인(계정 B, 테스트용 주소)했고, 이후 조작·캡처는 AI가 수행했다. 서버 종료(21:47:56)·재시작(21:48:18) 외의 시각은 분 단위 근사치다.
+
+| 시각 | 동작 | 결과 | 화면 |
+|---|---|---|---|
+| 21:44 | 계정 B 로그인 직후 | 프로젝트 0개, 할 일 0건 — 계정 A 의 `B5 영속성 확인` 이 보이지 않음 | `11-supabase-b-cannot-see-a.jpg` |
+| 21:45 | 프로젝트 `클라우드 과제` + 할 일 3건 등록 | 목록·개수(0/3) 표시 | `12-supabase-saved.jpg` |
+| 21:46 | `완료 체크 확인` 완료 처리 | 취소선·"완료" 배지, 개수 1/3 | `13-supabase-completed.jpg` |
+| 21:47 | `삭제 확인용 할 일` 삭제 | 개수 1/2 | `14-supabase-deleted.jpg` |
+| 21:47 | 앱을 거치지 않고 Supabase REST 를 B 의 토큰으로 직접 조회 | `완료 체크 확인` is_done=true, `삭제 확인용 할 일` 0행 | — |
+| 21:47:56 | 로컬 FastAPI 서버 종료 | `/api/health` 연결 거부, 8000 포트 LISTEN 없음. 브라우저 새로고침 시 데이터 없음 | `15-supabase-server-stopped.jpg` |
+| 21:48:18 | 서버 재시작 후 브라우저 새로고침 | 완료·삭제 상태 그대로 2건 표시 | `16-supabase-after-restart.jpg` |
+
+- 재시작 후에는 브라우저에 남아 있던 세션 쿠키로 접속했으며 **재로그인은 하지 않았다.** 새 세션(재로그인) 후 데이터 유지는 2-5 에서 별도로 확인했다.
+- 할 일 등록 중 응답 지연으로 자동 조작의 등록 요청이 한 번 더 처리되어 같은 제목의 할 일이 1건 중복 생성되었고, 캡처 전에 삭제했다.
 
 ## 3. Render 배포 준비
 

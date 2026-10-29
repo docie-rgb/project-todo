@@ -1,5 +1,48 @@
 # Project Todo
 
+## 과제 D-7 제출물 안내
+
+길 A(로컬 SQLite)로 완성한 Todo 앱을 길 B(Supabase + RLS)로 전환한 결과물입니다.
+
+| 평가 기준 | 확인할 곳 |
+|---|---|
+| **PRD 한 장** (30점) | [PRD.md](PRD.md) |
+| **데이터가 남는 Todo 앱** — CRUD, 앱을 껐다 켜도 데이터 유지 (40점) | [작동 화면](#작동-화면) · [TEST_LOG.md](TEST_LOG.md) §1 (로컬), §2-5 (클라우드) |
+| **로컬·클라우드 저장과 보안 확인** — 클라우드 전환·RLS 기록 (30점) | [TEST_LOG.md](TEST_LOG.md) §2 · [RLS 검증 결과 26/26](docs/rls_check_result.md) · [클라우드 영속성 결과](docs/cloud_persistence_result.md) |
+
+**한 줄 기록**
+
+- 클라우드 전환: 저장소 인터페이스를 유지한 채 `DB_BACKEND=supabase` 로 Supabase(PostgreSQL)에 저장하고, 서버 완전 종료·재시작 후 재로그인해도 데이터가 그대로임을 확인했다.
+- RLS 확인: 테스트 계정 A·B 의 일반 사용자 토큰으로 Supabase 에 직접 요청해, B 가 A 의 데이터를 조회·수정·삭제·연결할 수 없고 비로그인 요청도 거부됨을 26개 항목 모두 통과로 확인했다.
+
+참고 문서: [DB_DESIGN.md](DB_DESIGN.md) (DB 설계) · [supabase/schema.sql](supabase/schema.sql) (테이블·RLS) · [DEPLOY.md](DEPLOY.md) (Render 배포 준비, 실제 배포는 하지 않음)
+
+### 작동 화면
+
+**클라우드 (Supabase 모드, 테스트 계정 B 로 로그인)** — 절차와 DB 직접 확인 결과: [TEST_LOG.md](TEST_LOG.md) §2-8
+
+| 화면 | 설명 |
+|---|---|
+| ![저장](docs/screenshots/12-supabase-saved.jpg) | ① 할 일 3건이 Supabase 에 저장된 화면 |
+| ![완료](docs/screenshots/13-supabase-completed.jpg) | ② 완료 체크 → 취소선·"완료" 표시, 개수 1/3 |
+| ![삭제](docs/screenshots/14-supabase-deleted.jpg) | ③ 할 일 삭제 → 개수 1/2 (DB 에서도 행 삭제 확인) |
+| ![서버 종료](docs/screenshots/15-supabase-server-stopped.jpg) | ④ 로컬 FastAPI 서버 완전 종료 중 — 데이터를 불러오지 못함 |
+| ![재시작 후](docs/screenshots/16-supabase-after-restart.jpg) | ⑤ 서버 재시작 후 접속 — 완료·삭제 상태 그대로 유지 |
+| ![B 화면](docs/screenshots/11-supabase-b-cannot-see-a.jpg) | 계정 B 첫 로그인 — 계정 A 의 데이터가 보이지 않음 (RLS) |
+
+**로컬 (SQLite 모드)** — 서버 재시작 전후 API 응답 비교 절차: [TEST_LOG.md](TEST_LOG.md) §1-3
+
+| 화면 | 설명 |
+|---|---|
+| ![등록·완료·마감 지남](docs/screenshots/01-before-restart.jpg) | 프로젝트·할 일 등록, 완료 체크(취소선), 마감 지난 미완료(빨간색) |
+| ![서버 재시작 후](docs/screenshots/03-after-server-restart.jpg) | 서버 완전 종료·재시작 후 같은 데이터 |
+| ![수정 모드](docs/screenshots/07-edit-mode.jpg) | 할 일 제목·마감일·소속 프로젝트 수정 |
+| ![미분류](docs/screenshots/04-unassigned-todos.jpg) | 미분류 할 일 |
+| ![프로젝트 삭제 후](docs/screenshots/06-project-deleted-todos-unassigned.jpg) | 프로젝트 삭제 시 소속 할 일이 미분류로 이동 |
+| ![이름 중복 거부](docs/screenshots/05-duplicate-name-rejected.jpg) | 프로젝트 이름 중복(대소문자·공백 무시) 거부 |
+
+---
+
 여러 프로젝트의 할 일을 나눠 관리하는 웹 Todo 앱. 저장소를 두 가지 중에서 고를 수 있다.
 
 | 모드 | `.env` 의 `DB_BACKEND` | 데이터 위치 | 로그인 |

@@ -1,6 +1,6 @@
 # AIFFEL Campus Agent Code Review Templete
-- 개발자 : docie-rgb
-- 리뷰어 : zslayer-dev
+- 개발자 : 최승현
+- 리뷰어 : 변경진
 
 > 리뷰 대상: [docie-rgb/project-todo](https://github.com/docie-rgb/project-todo) `02291bf` (2026-10-30)
 > 리뷰 방법: 코드·문서를 직접 읽고, **리뷰어 PC에서 직접 설치·실행**(Python 3.12, 로컬 SQLite 모드)해 확인했습니다. Supabase 모드는 개발자의 키가 필요해서 저장소에 첨부된 실행 화면·검증 기록으로 확인했습니다.
